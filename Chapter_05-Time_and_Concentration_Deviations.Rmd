@@ -1,0 +1,86 @@
+---
+title: "Time and Concentration Deviations"
+author: "William Denney"
+date: "October 21, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(diagram)
+```
+
+# Introduction
+
+Time and concentration deviations may require correction prior to completing final NCA calculations.  This section describes methods used for corrections and the associated calculations to be performed prior to final calculations.
+
+# Limit of Quantification Modifications
+
+At least one of the following rules must be implemented for handling concentrations below the limit of quantification (BLOQ).  Different rules may be implemented for
+
+* the predose concentration measurement,
+* concentrations before the first concentration above the LOQ,
+* BLOQ concentrations between the concentrations above the LOQ, and
+* after the last concentration above the LOQ.
+
+Rule Number | Short description | Description
+----------- | ----------------- | ------------
+LOQ-1       | Exclude           | Exclude any BLOQ value.  (LOQ-1 is the typical default.)
+LOQ-2       | Set 0             | Set BLOQ values to 0.
+LOQ-3       | Set half-LOQ then exclude | Set first BLOQ value to $0.5 \times LOQ$, exclude subsequent BLOQ values.
+LOQ-4       | Set half-LOQ then 0 | Set first BLOQ value to $0.5 \times LOQ$, set subsequent BLOQ values to 0.
+LOQ-5       | Set half-LOQ      | Set BLOQ values to $0.5 \times LOQ$.
+
+# Time Deviation Correction Rules
+
+The time deviation correction rules have to be applied in cases where the actual sampling time deviates from the nominal time at t=0 (all AUCs), t=t_upper (AUCINT) and/or t=TAU (AUCTAU).
+
+DOSING             | RULE NUMBER | DESCRIPTION | PARAMETER
+------------------ | ----------- | ----------- | ---------
+Single Dose (SD)   | SDT-1       | set actual time to 0 | t0
+Single Dose (SD)   | SDT-2       | correct concentration at deviating time by interpolation | t_upper
+Single Dose (SD)   | SDT-3       | correct concentration at deviating time by extrapolation | t_upper
+Multiple Dose (MD) | MDT-1       | at predose, if sample taken after dosing, add a row t=0 and c=NA | t0
+Multiple Dose (MD) | MDT-2       | correct concentration at deviating time by interpolation | t_upper, tau
+Multiple Dose (MD) | MDT-3       | correct concentration at deviating time by extrapolation | t0, t_upper, tau
+
+# Concentration Deviation Correction Rules
+
+Concentration substitution rules have to be applied where the concentration is missing at t=0 (all AUCs), t=t_upper (AUCINT) and/or t=TAU (AUCTAU).
+
+DOSING             | RULE NUMBER | DESCRIPTION | PARAMETER
+------------------ | ----------- | ----------- | ---------
+Single Dose (SD) | SDC-1 | set concentration to 0 (only for non-endogenous compounds) | t0
+Single Dose (SD) | SDC-2 | impute missing concentration by interpolation | t_upper, TAU
+Single Dose (SD) | SDC-3 | impute missing concentration by extrapolation | t_upper, TAU
+Single Dose (SD) | SDC-4 | Bolus IV: impute concentration at C0 by back-extrapolation using the first two observations. If the resulting slope is positive or one of both concentrations is LOQ or NA, the first non-zero concentration is used as C0. | t0
+Multiple Dose (MD) | MDC-1 | impute missing conc. by existing conc. at t0 or TAU (only if steady state has been reached) | t0, TAU
+Multiple Dose (MD) | MDC-2 | impute missing concentration by interpolation | t_upper, TAU
+Multiple Dose (MD) | MDC-3 | impute missing concentration by extrapolation | t_upper, TAU
+Multiple Dose (MD) | MDC-4 | Bolus IV: impute concentration at C0 by back-extrapolation using the first two observations. If the resulting slope is positive or one of both concentrations is LOQ or NA, the first non-zero concentration is used as C0 | t0
+
+# Interpolation
+
+To obtain a concentration ($C_i$) at time i ($t_i$), lying between the times $t_a$ and $t_b$ with concentrations $C_a$ and $C_b$ respectively, and no dose occurring between $t_a$ and $t_b$ interpolation will be carried out.  Multiple methods of interpolation are possible, and the method of interpolation should align with the method for calculation of area under the concentration-time curve (AUC).
+
+## Zero Interpolation
+
+If $C_a$ and $C_b$ are BLOQ, $C_i$ should be set to BLOQ.
+
+## Linear Interpolation
+
+If linear AUC integration is used in the interval between $t_a$ and $t_b$ (trapezoidal rule AUC calculation or linear-up/log-down AUC with $C_b \geq C_a$), the following formula should be used.
+
+$$C_i = C_a + \left(C_b-C_a\right)\frac{t_i-t_a}{t_b-t_a}$$
+
+## Log-Linear Interpolation
+
+If log-linear AUC integration is used in the interval between $t_a$ and $t_b$ (linear-up/log-down AUC with $C_b < C_a$), the following formula should be used.
+$$C_i = exp\left( log\left(C_a\right) + \left(log\left(C_b\right) - log\left(C_a\right)\right) \frac{t_i - t_a}{t_b - t_a} \right)$$
+
+# Extrapolation
+
+To extrapolate a concentration $C_i$ at time $t_i$ lying after a time $t_a$ with measurable concentration $C_a$ and no dose occurring between $t_a$ and $t_i$, the following formula should be used.
+$$C_i = C_a exp\left(-\lambda_z \times \left(t_i - t_a\right)\right)$$
+
+where $\lambda_z$ is the elimination rate constant and it must be positive.  It is calculated during calculation of the half-life ($t_{1/2}$), and is calculable from half-life as $\lambda_z=\frac{log_e(2)}{t_{1/2}}$.

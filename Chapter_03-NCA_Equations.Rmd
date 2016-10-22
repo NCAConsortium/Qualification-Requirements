@@ -1,0 +1,762 @@
+---
+title: "NCA Equations"
+author: "William Denney"
+date: "October 21, 2016"
+output:
+  html_document:
+    toc: 1
+---
+
+```{r setup, include=FALSE}
+library(pander)
+knitr::opts_chunk$set(echo = TRUE)
+source("report.helpers.R")
+library(knitcitations)
+pander::panderOptions("keep.line.breaks", TRUE)
+cleanbib()
+agah <- citep("http://www.agah.eu/fileadmin/_migrated/content_uploads/PK-glossary_PK_working_group_2004.pdf")
+```
+
+For the parameter table below, concentrations measured below the limit of concentration are assumed to be written as zero.  Also, mathematical terminology differs in many references; throughout this document, $ln$ is used to indicate the natural logarithm (also known as the logarithm base $e$, $log_e$, and ${}^elog$).
+
+# Defined Parameters
+
+The following parameter definitions are used throughout the parameter table, and these parameters are defined parameter (not calculated).
+
+```{r defined, echo=FALSE}
+defined <- data.frame(
+  Symbol=c("C", "D", "t", "$\\tau$"),
+  Units=c("concentration", "amount", "time", "time"),
+  Definition=c("Concentration", "Dose", "Time", "Dosing interval"))
+pander(defined)
+```
+
+
+# Parameter Table
+
+```{r paramdeffun, echo=FALSE}
+#' Add a parameter to the parameter list
+#'
+#' @param symbol is the NCA abbreviation as it would typically be used in the
+#'   text of a paper.  It may use LaTex inline formula notation with dollar
+#'   signs around the value.  It may also be a vector of symbols if more than
+#'   one have nearly identical definitions.
+#' @param units A text description of the units like "concentration" or
+#'   "concentration*time".
+#' @param definition A text definition of the parameter.
+#' @param cdisc The CDISC PKPARMCD value for the term (all capital letters
+#'   <= 8 characters).
+#' @param single Can the parameter be used with single dosing? (logical)
+#' @param multiple Can the parameter be used with steady-state multiple
+#'   dosing? (logical)
+#' @param iv Can the parameter be used with intravenous dosing? (logical)
+#' @param po Can the parameter be used with oral dosing? (logical)
+#' @param equation The LaTeX-formatted equation for the parameter (without
+#'   the dollar signs).
+#' @param notes Notes on the use of the parameter.  This will often define
+#'   the differences between variants of the parameter.
+addparam <- local({
+  paramlist <- data.frame()
+  function(symbol, units, definition, cdisc,
+           single, multiple,
+           iv, po, equation, notes="",
+           reference="") {
+    if (all(equation %in% "Observed")) {
+      ## Do nothing
+    } else if (!all(equation %in% "")) {
+      equation <-
+        paste0("$$", equation, "$$",
+               collapse="\n")
+    }
+    paramlist <<-
+      rbind(paramlist,
+            data.frame(
+              symbol=paste(symbol, collapse=", "),
+              units=units,
+              definition=definition,
+              cdisc=paste(cdisc, collapse=", "),
+              single=single,
+              multiple=multiple,
+              intravenous=iv,
+              extravascular=po,
+              equation=equation,
+              notes=paste(notes, collapse="\n"),
+              reference=reference,
+              stringsAsFactors=FALSE))
+  }
+})
+```
+
+```{r parameterdefs, echo=FALSE}
+## Common, observed parameters
+addparam(symbol="$C_{max}$",
+         units="concentration",
+         definition="The maximum concentration occurring at $t_{max}$.",
+         cdisc=c("CMAX"),
+         single=TRUE,
+         multiple=TRUE,
+         iv=TRUE,
+         po=TRUE,
+         equation="Observed",
+         notes="",
+         reference="")
+
+addparam(symbol="$t_{max}$",
+         units="time",
+         definition="The time of $C_{max}$.",
+         cdisc=c("TMAX"),
+         single=TRUE,
+         multiple=TRUE,
+         iv=TRUE,
+         po=TRUE,
+         equation="Observed",
+         notes="",
+         reference="")
+
+addparam(symbol="$C_{min}$",
+         units="concentration",
+         definition="The minimum concentration occurring between dose time and dose time plus $\\tau$ (at $t_{min}$).",
+         cdisc=c("CMIN"),
+         single=TRUE,
+         multiple=TRUE,
+         iv=TRUE,
+         po=TRUE,
+         equation="Observed",
+         notes="Compare with $C_{trough}$.",
+         reference="")
+
+addparam(symbol="$t_{min}$",
+         units="time",
+         definition="The time of $C_{min}$.",
+         cdisc=c("TMIN"),
+         single=TRUE,
+         multiple=TRUE,
+         iv=TRUE,
+         po=TRUE,
+         equation="Observed",
+         notes="",
+         reference="")
+
+addparam(symbol="$C_{trough}$",
+         units="concentration",
+         definition="Concentration at end of dosing interval.",
+         cdisc=c("CTROUGH"),
+         single=TRUE,
+         multiple=TRUE,
+         iv=TRUE,
+         po=TRUE,
+         equation="Observed",
+         notes="Compare with $C_{min}$.",
+         reference="")
+
+addparam(symbol="$t_{lag}$",
+         units="time",
+         definition="The time prior to the first increase in concentration.",
+         cdisc=c("TLAG"),
+         single=TRUE,
+         multiple=TRUE,
+         iv=TRUE,
+         po=TRUE,
+         equation="Observed",
+         notes="",
+         reference=agah)
+
+
+## Clast-related parameters
+addparam(symbol="$C_{last,obs}$",
+         units="concentration",
+         definition="The last observed concentration above the limit of quantification.  Equivalently, the concentration corresponding to $t_{last}$.",
+         cdisc=c("CLST"),
+         single=TRUE,
+         multiple=TRUE,
+         iv=TRUE,
+         po=TRUE,
+         equation="Observed",
+         notes="",
+         reference=agah)
+
+addparam(symbol="$C_{last,pred}$",
+         units="concentration",
+         definition="The concentration at $t_{last}$ predicted from the log-linear regression of the terminal part of the concentration-time curve (as estimated for half-life).",
+         cdisc=c(),
+         single=TRUE,
+         multiple=TRUE,
+         iv=TRUE,
+         po=TRUE,
+         equation="C_{last,pred} = \\lambda_z \\times t_{last} + A",
+         notes="Parameters in the equation are fit during half-life fitting.",
+         reference=agah)
+
+addparam(symbol="$t_{last}$",
+         units="time",
+         definition="The time of the last measurable (positive) concentration.",
+         cdisc=c("TLST"),
+         single=TRUE,
+         multiple=TRUE,
+         iv=TRUE,
+         po=TRUE,
+         equation="Observed",
+         notes="",
+         reference=agah)
+
+# AUC-related parameters
+addparam(symbol="$AUC_{a,b,linear}$",
+         units="concentration*time",
+         definition="Area under the concentration time curve from measurement at time $a$ to time $b$ using the linear trapezoidal rule.",
+         cdisc="",
+         single=TRUE,
+         multiple=TRUE,
+         iv=TRUE,
+         po=TRUE,
+         equation="AUC_{t_i,t_{i+1}} = \\frac{1}{2} \\left(C_i + C_{i+1}\\right) \\left(t_{i+1} - t_i\\right)",
+         reference=agah)
+
+addparam(symbol="$AUC_{a,b,log-linear}$",
+         units="concentration*time",
+         definition="Area under the concentration time curve from measurement at time $a$ to time $b$ using the log-linear trapezoidal rule.",
+         cdisc="",
+         single=TRUE,
+         multiple=TRUE,
+         iv=TRUE,
+         po=TRUE,
+         equation="AUC_{t_i,t_{i+1}} = \\frac{\\left(C_i - C_{i+1}\\right) \\left(t_{i+1} - t_i\\right)}{ln{C_i} - ln{C_{i+1}}}",
+         reference=agah)
+
+addparam(symbol=c("$AUC_{0,t}$",
+                  "$AUC_{last}$",
+                  "$AUC_{\\tau}$"),
+         units="concentration*time",
+         definition="Area under the concentration time curve during a defined interval using only samples above the limit of quantification",
+         cdisc=c("AUCINT",
+                 "AUCLST",
+                 "AUCTAU"),
+         single=TRUE,
+         multiple=TRUE,
+         iv=TRUE,
+         po=TRUE,
+         equation="AUC = \\sum_{t=a}^{t=min(t_{last}, b)} AUC_{t_i,t_{i+1}}",
+         notes="Often, the $AUC_{a,b,linear}$ and $AUC_{a,b,log-linear}$ are combined where the linear trapezoidal rule is used for ascending concentrations ($C_{i+1} >= C_i$) or when the next concentration is below the limit of quantification ($C_{i+1} > 0$, if applicable), and the log-linear trapezoidal rule is used for descending concentrations $C_{i+1} < C_i$.",
+         reference=agah)
+
+addparam(symbol=c("$AUC_{t_{last}-\\infty,pred}$",
+                  "$AUC_{t_{last}-\\infty,obs}$"),
+         units="concentration*time",
+         definition="Area under the concentration-time curve from $t_{last}$ to $\\infty$",
+         cdisc=c(),
+         single=TRUE,
+         multiple=TRUE,
+         iv=TRUE,
+         po=TRUE,
+         equation="\\frac{C_{last}}{\\lambda_z}",
+         notes="$C_{last}$ should be $C_{last,pred}$ or $C_{last,obs}$ depending on which version of the parameter is desired.",
+         reference=agah)
+
+addparam(symbol="$AUC_{t_{last}-\\infty,all}$",
+         units="concentration*time",
+         definition="Area under the concentration-time curve from $t_{last}$ to $\\infty$ as used for $AUC_{all}$.",
+         cdisc=c(),
+         single=TRUE,
+         multiple=TRUE,
+         iv=TRUE,
+         po=TRUE,
+         equation="AUC_{t_{last},t_{last+1},linear}",
+         notes="$t_{last+1}$ is the first time point below the limit of quantification.",
+         reference=agah)
+
+addparam(c("$AUC_{0-\\infty,pred}$",
+           "$AUC_{0-\\infty,obs}$"),
+         units="concentration*time",
+         definition="The area under the curve (AUC) extrapolated to $\\infty$, calculated using the observed or predicted value of the last non-zero concentration.",
+         cdisc=c("AUCIFP",
+                 "AUCIFO"),
+         single=TRUE,
+         multiple=FALSE,
+         iv=TRUE,
+         po=TRUE,
+         equation="AUC_{last} + AUC_{t_{last}-\\infty}",
+         notes="Use the 'pred' or 'obs' version of $AUC_{t_{last}-\\infty}$ for the equivalent version of $AUC_{0-\\infty}$.",
+         reference=agah)
+
+addparam(symbol="$AUC_{0,all}$",
+         units="concentration*time",
+         definition="The area under the curve (AUC) from the time of dosing to the time of the last observation, regardless of whether the last concentration is measurable or not.",
+         cdisc=c("AUCALL"),
+         single=TRUE,
+         multiple=TRUE,
+         iv=TRUE,
+         po=TRUE,
+         equation="AUC_{last} + AUC_{t_{last}-\\infty,all}",
+         notes="If all concentrations are above the limit of quantification, then $AUC_{0,all}=AUC_{last}$.",
+         reference=agah)
+
+addparam(symbol=c("$AUC_{\\%extrap,obs}$",
+                  "$AUC_{\\%extrap,pred}$"),
+         units="%",
+         definition="The area under the curve (AUC) from the last observed non-zero concentration value to infinity as a percentage of the area under the curve extrapolated to infinity using either the observed or predicted $C_{last}$.",
+         cdisc=c("AUCPEO", "AUCPEP"),
+         single=TRUE,
+         multiple=FALSE,
+         iv=TRUE,
+         po=TRUE,
+         equation="\\frac{AUC_{t_{last},\\infty}}{AUC_{0,\\infty}} \\times 100",
+         notes="Use the 'pred' or 'obs' version of $AUC_{t_{last},\\infty}$ and $AUC_{0,\\infty}$ for the equivalent version of $AUC_{\\%extrap}$.",
+         reference=agah)
+
+addparam(symbol="$F$",
+         units="fraction",
+         definition="Bioavailability",
+         cdisc=c(),
+         single=TRUE,
+         multiple=FALSE,
+         iv=TRUE,
+         po=TRUE,
+         equation=c("\\frac{AUC_{0,\\infty,ev}}{AUC_{0,\\infty,iv}} \\frac{D_{iv}}{D_{ev}}",
+                    "\\frac{AUC_{0,\\infty,test}}{AUC_{0,\\infty,reference}}  \\frac{D_{reference}}{D_{test}}"),
+         notes="Bioavailability is the ratio of two AUC values.  In addition to the comparison of extravascular ($ev$) to intravascular ($iv$) for absolute bioavailability, relative bioavailability compares any two $AUC_{0,\\infty} values, a 'test' to a 'reference'$.  In some cases, bioavailability may be tested at steady-state using $AUC_{0,\\tau}$ instead of $AUC_{0,\\infty}$.",
+         reference=agah)
+
+# AUMC parameters
+
+addparam(symbol="$AUMC_{a,b,linear}$",
+         units="concentration*time^2^",
+         definition="Area under the first moment of the concentration time curve from measurement at time $a$ to time $b$ using the linear trapezoidal rule.",
+         cdisc="",
+         single=TRUE,
+         multiple=TRUE,
+         iv=TRUE,
+         po=TRUE,
+         equation="AUMC_{t_i,t_{i+1},linear} = \\frac{1}{2} \\left(t_{i+1} - t_{i}\\right) \\left(C_{i+1} t_{i+1} + C_i t_i\\right)",
+         reference=agah)
+
+addparam(symbol="$AUMC_{a,b,log-linear}$",
+         units="concentration*time^2^",
+         definition="Area under the first moment of the concentration time curve from measurement at time $a$ to time $b$ using the log-linear trapezoidal rule.",
+         cdisc="",
+         single=TRUE,
+         multiple=TRUE,
+         iv=TRUE,
+         po=TRUE,
+         equation="AUMC_{t_i,t_{i+1},log-linear} = \\frac{t_{i+1} - t_{i}}{ln\\left(C_i\\right) - ln\\left(C_{i+1}\\right)}  \\left(C_{i+1} \\times t_{i+1} + C_i \\times t_i\\right) + \\\\ \\left(\\frac{t_{i+1} - t_{i}}{ln\\left(C_i\\right) - ln\\left(C_{i+1}\\right)}\\right)^2 \\left(C_i - C_{i+1}\\right)",
+         reference=agah)
+
+addparam(symbol=c("$AUMC_{0,t}$",
+                  "$AUMC_{last}$",
+                  "$AUMC_{\\tau}$"),
+         units="concentration*time^2^",
+         definition="Area under the first moment of the concentration time curve during a defined interval using only samples above the limit of quantification",
+         cdisc=c("AUMCLST",
+                 "AUMCTAU"),
+         single=TRUE,
+         multiple=TRUE,
+         iv=TRUE,
+         po=TRUE,
+         equation="AUMC_{last} = \\sum_{t=a}^{t=min(t_{last}, b)} AUMC_{t_i,t_{i+1}}",
+         notes="See $AUC_{last}$ notes for suggested calculation options.",
+         reference=agah)
+
+addparam(symbol=c("$AUMC_{t_{last}-\\infty,obs}$",
+                  "$AUMC_{t_{last}-\\infty,pred}$"),
+         units="concentration*time^2^",
+         definition="Area under the first moment of the concentration-time curve from $t_{last}$ to $\\infty$",
+         cdisc=c(),
+         single=TRUE,
+         multiple=TRUE,
+         iv=TRUE,
+         po=TRUE,
+         equation="\\frac{C_{last} t_{last}}{\\lambda_z} + \\frac{C_{last}}{\\lambda_z^2}",
+         notes="$C_{last}$ should be $C_{last,pred}$ or $C_{last,obs}$ depending on which version of the parameter is desired.",
+         reference=agah)
+
+addparam(symbol="$AUMC_{t_{last}-\\infty,all}$",
+         units="concentration*time^2^",
+         definition="Area under the first moment of the concentration-time curve from $t_{last}$ to $\\infty$ as used for $AUC_{all}$.",
+         cdisc=c(),
+         single=TRUE,
+         multiple=TRUE,
+         iv=TRUE,
+         po=TRUE,
+         equation="AUC_{t_{last},t_{last+1},linear}",
+         notes="$t_{last+1}$ is the first time point below the limit of quantification.",
+         reference=agah)
+
+addparam(c("$AUMC_{0-\\infty,obs}$",
+           "$AUMC_{0-\\infty,pred}$"),
+         units="concentration*time^2^",
+         definition="Area under the first moment of the concentration-time curve extrapolated to $\\infty$, calculated using the observed or predicted value of the last non-zero concentration.",
+         cdisc=c("AUMCIFP",
+                 "AUMCIFO"),
+         single=TRUE,
+         multiple=FALSE,
+         iv=TRUE,
+         po=TRUE,
+         equation="AUMC_{last} + AUMC_{t_{last}-\\infty}",
+         notes="Use the 'obs' or 'pred' version of $AUC_{t_{last}-\\infty}$ for the equivalent version of $AUC_{0-\\infty}$.",
+         reference=agah)
+
+addparam(symbol="$AUMC_{0,all}$",
+         units="concentration*time^2^",
+         definition="Area under the first moment of the concentration-time curve from the time of dosing to the time of the last observation, regardless of whether the last concentration is measurable or not.",
+         cdisc=c(),
+         single=TRUE,
+         multiple=TRUE,
+         iv=TRUE,
+         po=TRUE,
+         equation="AUMC_{last} + AUMC_{t_{last}-\\infty,all}",
+         notes="If all concentrations are above the limit of quantification, then $AUMC_{0,all}=AUMC_{last}$.",
+         reference=agah)
+
+addparam(symbol=c("$AUMC_{\\%extrap,obs}$",
+                  "$AUMC_{\\%extrap,pred}$"),
+         units="%",
+         definition="Area under the first moment of the concentration-time curve from the last observed non-zero concentration value to infinity as a percentage of the area under the curve extrapolated to infinity using either the observed or predicted $C_{last}$.",
+         cdisc=c("AUMCPEO", "AUMCPEP"),
+         single=TRUE,
+         multiple=FALSE,
+         iv=TRUE,
+         po=TRUE,
+         equation="\\frac{AUMC_{t_{last}-\\infty}}{AUMC_{0,\\infty}} \\times 100",
+         notes="Use the 'pred' or 'obs' version of $AUMC_{t_{last}-\\infty}$ for the equivalent version of $AUMC_{0-\\infty}$.",
+         reference=agah)
+
+## Half-life related parameters
+addparam(symbol="$t_{1/2}$",
+         units="time",
+         definition="Terminal half-life",
+         cdisc=c("LAMZHL"),
+         single=TRUE,
+         multiple=TRUE,
+         iv=TRUE,
+         po=TRUE,
+         equation="\\frac{ln 2}{\\lambda_z}",
+         notes="",
+         reference=agah)
+
+addparam(symbol="$\\lambda_z$",
+         units="1/time",
+         definition="The first order rate constant associated with the terminal (log-linear) portion of the curve.",
+         cdisc=c("LAMZ"),
+         single=TRUE,
+         multiple=TRUE,
+         iv=TRUE,
+         po=TRUE,
+         equation="ln C = A - \\lambda_z t",
+         notes="Fit the equation using observed concentration ($C$) and time ($t$) from the terminal slope of the concentration-time curve.  Selection of points for inclusion may be either manual or regression-quality based.",
+         reference=agah)
+
+addparam(symbol=c("$t_{first,\\lambda_z}$",
+                  "$t_{last,\\lambda_z}$"),
+         units="time",
+         definition="The first and last time (lower and upper limit on time) for values to be included in the calculation of $\\lambda_z$.",
+         cdisc=c("LAMZLL",
+                 "LAMZUL"),
+         single=TRUE,
+         multiple=TRUE,
+         iv=TRUE,
+         po=TRUE,
+         equation="",
+         notes="",
+         reference=agah)
+
+addparam(symbol="$N_{\\lambda_z}$",
+         units="count",
+         definition="The number of time points used in computing $\\lambda_z$.",
+         cdisc=c("LAMZNPT"),
+         single=TRUE,
+         multiple=TRUE,
+         iv=TRUE,
+         po=TRUE,
+         equation="",
+         notes="$N_{\\lambda_z}$ should always be greater than or equal to 3.",
+         reference="")
+
+addparam(symbol="$r^2$",
+         units="fraction",
+         definition="The goodness of fit statistic for the terminal elimination phase.",
+         cdisc=c("R2"),
+         single=TRUE,
+         multiple=TRUE,
+         iv=TRUE,
+         po=TRUE,
+         equation="1 - \\frac{\\sum_i \\left(C_i - \\hat{C_i}\\right)^2}{\\sum_i \\left(C_i - \\overline{C_i}\\right)^2}",
+         notes="$r^2$ is typically directly available from line-fitting functions and rarely requires direct calculation.  $\\overline{C_i}$ is the mean concentration of values used; $\\hat{C_i}$ is the estimated concentation.",
+         reference="")
+
+addparam(symbol="$r^2_{adj}$",
+         units="fraction",
+         definition="The goodness of fit statistic for the terminal elimination phase, adjusted for the number of time points used in the estimation of $\\lambda_z$.",
+         cdisc=c("R2ADJ"),
+         single=TRUE,
+         multiple=TRUE,
+         iv=TRUE,
+         po=TRUE,
+         equation="1 - \\left(1 - r^2\\right) \\frac{1}{N_{\\lambda_z}-2}",
+         notes="The canonical form of $r^2_{adj}$ has the fraction on the right of the equation as $\\frac{p}{n-p-1}$, but for fitting terminal regression $p=1$.",
+         reference=agah)
+
+## Mean Residence Time
+
+addparam(symbol=c("$MRT_{ev,last}$",
+                  "$MRT_{ev,\\infty,obs}$",
+                  "$MRT_{ev,\\infty,pred}$",
+                  "$MRT_{iv,last}$",
+                  "$MRT_{iv,\\infty,obs}$",
+                  "$MRT_{iv,\\infty,pred}$"),
+         units="time",
+         definition="Mean residence time (MRT) from the time of dosing to the time of the last measurable concentration or infinity, for a substance administered by intravascular or extravascular dosing.",
+         cdisc=c("MRTEVLST",
+                 "MRTEVIFO",
+                 "MRTEVIFP",
+                 "MRTIVLST",
+                 "MRTIVIFO",
+                 "MRTIVIFP"),
+         single=TRUE,
+         multiple=TRUE,
+         iv=TRUE,
+         po=TRUE,
+         equation="\\frac{AUMC}{AUC}",
+         notes="The equation shown here includes the mean absorption time for extravascular administration aligning with the SDTM definition.  The $AUMC$ and $AUC$ should be chosen to match the parameter type desired (e.g. use $AUMC_{last}$ and $AUC_{last}$ for $MRT_{last}$).",
+         reference=agah)
+
+addparam(symbol=c("$MAT_{last}$",
+                  "$MAT_{\\infty,obs}$",
+                  "$MAT_{\\infty,pred}$"),
+         units="time",
+         definition="Mean absorption time of a substance administered by extravascular dosing.",
+         cdisc=c("MAT"),
+         single=TRUE,
+         multiple=TRUE,
+         iv=FALSE,
+         po=TRUE,
+         equation=c("MRT_{ev} - MRT{iv}",
+                    "t_{lag} + \\frac{1}{K_a}"),
+         notes="$K_a$ is the absorption rate from multi-exponential compartmental analysis curve fitting (and is not typically applicable for noncompartmental analysis).",
+         reference=agah)
+
+## Peak to trough and similar
+
+addparam(symbol="$PTR$",
+         units="ratio",
+         definition="The maximum concentration during a dosing interval divided by the concentration at the end of the dosing interval.",
+         cdisc=c("PTROUGHR"),
+         single=FALSE,
+         multiple=TRUE,
+         iv=TRUE,
+         po=TRUE,
+         equation="\\frac{C_{max}}{C_{trough}}",
+         notes="",
+         reference=agah)
+
+addparam(symbol="$TPR$",
+         units="ratio",
+         definition="The concentration at the start of a dosing interval divided by the maximum concentration during the dosing interval.",
+         cdisc=c("TROUGHPR"),
+         single=FALSE,
+         multiple=TRUE,
+         iv=TRUE,
+         po=TRUE,
+         equation="\\frac{C_{trough}}{C_{max}}",
+         notes="",
+         reference="")
+
+addparam(symbol="$PTF$",
+         units="%",
+         definition="The difference between Cmin and Cmax standardized to Cavg, between dose time and $\\tau$.",
+         cdisc=c("FLUCP"),
+         single=FALSE,
+         multiple=TRUE,
+         iv=TRUE,
+         po=TRUE,
+         equation="100 \\times \\frac{C_{max} - C_{min}}{C_{avg}}",
+         notes="",
+         reference=agah)
+
+addparam(symbol=c("$C_{avg}$", "$C_{av}$"),
+         units="concentration",
+         definition="Average concentration",
+         cdisc=c("CAVG"),
+         single=FALSE,
+         multiple=TRUE,
+         iv=TRUE,
+         po=TRUE,
+         equation="\\frac{AUC_{0,\\tau}}{\\tau}",
+         notes="",
+         reference=agah)
+
+## Accumulation ratio
+addparam(symbol="$R_{A,AUC}$",
+         units="fraction",
+         definition="The area under the curve at steady state divided by the area under the curve over the initial dosing interval.",
+         cdisc=c("ARAUC"),
+         single=FALSE,
+         multiple=TRUE,
+         iv=TRUE,
+         po=TRUE,
+         equation="R_{A,AUC} = \\frac{AUC_{\\tau,ss}}{AUC_{\\tau,sd}}",
+         notes="$ss$ indicates that value is at steady-state while $sd$ indicated that value is from the first (single) dose.",
+         reference=agah)
+
+addparam(symbol="$R_{A,C_{max}}$",
+         units="fraction",
+         definition="The maximum concentration at steady state divided by the maximum concentration during the initial dosing interval.",
+         cdisc=c("ARCMAX"),
+         single=FALSE,
+         multiple=TRUE,
+         iv=TRUE,
+         po=TRUE,
+         equation="R_{A,C_{max}} = \\frac{C_{max,ss}}{C_{max,sd}}",
+         notes="$ss$ indicates that value is at steady-state while $sd$ indicated that value is from the first (single) dose.",
+         reference=agah)
+
+addparam(symbol="$R_{A,C_{min}}$",
+         units="fraction",
+         definition="The minimum concentration at steady state divided by the minimum concentration during the initial dosing interval.",
+         cdisc=c("ARCMIN"),
+         single=FALSE,
+         multiple=TRUE,
+         iv=TRUE,
+         po=TRUE,
+         equation="R_{A,C_{min}} = \\frac{C_{min,ss}}{C_{min,sd}}",
+         notes="$ss$ indicates that value is at steady-state while $sd$ indicated that value is from the first (single) dose.",
+         reference=agah)
+
+addparam(symbol="$R_{A,C_{trough}}$",
+         units="fraction",
+         definition="The trough concentration at steady state divided by the trough concentration during the initial dosing interval.",
+         cdisc=c("ARCTROUG"),
+         single=FALSE,
+         multiple=TRUE,
+         iv=TRUE,
+         po=TRUE,
+         equation="R_{A,C_{trough}} = \\frac{C_{trough,ss}}{C_{trough,sd}}",
+         notes="$ss$ indicates that value is at steady-state while $sd$ indicated that value is from the first (single) dose.",
+         reference=agah)
+
+## Clearance
+addparam(symbol=c("$CL_{ev,obs}$",
+                  "$CL_{ev,pred}$",
+                  "$CL_{ev,\\tau}$",
+                  "$CL_{iv,obs}$",
+                  "$CL_{iv,pred}$",
+                  "$CL_{iv,\\tau}$"),
+         units="volume/time",
+         definition="The total body clearance for extravascular or intravascular administration (divided by the fraction of dose absorbed for extravascular), calculated using the equivalent $AUC$.",
+         cdisc=c("CLFO",
+                 "CLFP",
+                 "CLFTAU",
+                 "CLO",
+                 "CLP",
+                 "CLTAU"),
+         single=TRUE,
+         multiple=TRUE,
+         iv=TRUE,
+         po=TRUE,
+         equation="\\frac{F \\times D}{AUC}",
+         notes="For each of the symbols, select the equivalent $AUC$.  Such as, $CL_{ev,pred}$ uses $AUC = AUC_{0,\\infty,pred}$",
+         reference=agah)
+
+## Volumes
+addparam(symbol=c("$V_{ss,obs}$",
+                  "$V_{ss,pred}$"),
+         units="volume",
+         definition="The volume of distribution at steady state based on the equivalent  for a substance administered by intravascular dosing.",
+         cdisc=c("VSSO", "VSSP"),
+         single=TRUE,
+         multiple=FALSE,
+         iv=TRUE,
+         po=FALSE,
+         equation=c("CL \\times MRT",
+                    "\\frac{F \\times D \\times AUMC}{{AUC}^2}"),
+         notes="SDTM parameters are specific to intravascular dosing.  For each of the symbols, select the equivalent $AUMC$ and $AUC$.  When extravascular dosing is used, it is referred to as the observed or apparent volume of distribution at steady-state.  CL and MRT may be given either for single dosing with $AUC_{0,\\infty}$ or steady-state with $AUC_{0,\\tau}$.",
+         reference=agah)
+
+addparam(symbol=c("$V_{z,ev,obs}$",
+                  "$V_{z,ev,pred}$",
+                  "$V_{z,ev,\\tau}$",
+                  "$V_{z,iv,obs}$",
+                  "$V_{z,iv,pred}$",
+                  "$V_{z,iv,\\tau}$"),
+         units="volume",
+         definition="The volume of distribution associated with the terminal slope following extravascular or intravascular administration (divided by the fraction of dose absorbed for extravascular), calculated using equivalent $AUC$.",
+         cdisc=c("VZFO",
+                 "VZFP",
+                 "VZFTAU",
+                 "VZO",
+                 "VZP",
+                 "VZTAU"),
+         single=TRUE,
+         multiple=TRUE,
+         iv=TRUE,
+         po=TRUE,
+         equation="\\frac{F \\times D}{AUC \\times \\lambda_z}",
+         notes="",
+         reference=agah)
+
+## IV dosing parameters
+addparam(symbol="$C_0$",
+         units="concentration",
+         definition="Initial concentration",
+         cdisc=c("C0"),
+         single=TRUE,
+         multiple=TRUE,
+         iv=TRUE,
+         po=FALSE,
+         equation="",
+         notes="IV bolus only.  $C_0$ is back-extrapolated from the first two data points after the infusion.  See data cleaning rules SDC-4 and MDC-4 for more details on the calculation and cleaning associated with $C_0$.",
+         reference="")
+
+addparam(symbol="$V_0$",
+         units="volume",
+         definition="The initial volume of distribution for a substance administered by bolus intravascular dosing.",
+         cdisc=c("V0"),
+         single=TRUE,
+         multiple=FALSE,
+         iv=TRUE,
+         po=FALSE,
+         equation="\\frac{D}{C_0}",
+         notes="",
+         reference=agah)
+
+addparam(symbol=c("$AUC_{\\%backextrap,obs}$",
+                  "$AUC_{\\%backextrap,pred}$"),
+         units="concentration*time",
+         definition="",
+         cdisc=c(),
+         single=TRUE,
+         multiple=TRUE,
+         iv=TRUE,
+         po=FALSE,
+         equation="\\frac{AUC_{0,first}}{AUC_{0,\\infty}}",
+         notes="IV bolus only.  $first$ is the first time point after 0, and both $AUC$ values should be calculated with $C_0$ included at time 0.",
+         reference="")
+
+
+## Convert the notes to references for later use
+paramtable <- environment(addparam)$paramlist
+mask.note <- !(paramtable$notes %in% c(NA, ""))
+notetable <- paramtable[mask.note,
+                        c("symbol", "notes")]
+idx.note <- 1:sum(mask.note)
+paramtable$notes[mask.note] <-
+  sprintf("[%d][%s]", idx.note, paramtable$symbol[mask.note])
+```
+
+```{r maketable, echo=FALSE}
+pander(paramtable, split.tables=Inf)
+```
+
+# Notes
+
+```{r notelist, results="asis", echo=FALSE}
+for (i in seq_len(nrow(notetable))) {
+  ## The link to the section header is automatic
+  cat(sprintf("## %s\n", notetable$symbol[i]))
+  cat(sprintf("%s\n\n", notetable$note[i]))
+}
+```
+
+# References
+
+```{r bibliography, echo=FALSE, results="asis"}
+knitcitations::bibliography()
+```
+

@@ -1,0 +1,62 @@
+---
+title: "Input and Output Data"
+author: "William Denney"
+date: "October 21, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Input Data
+
+The user must be able to define the following variables.
+
+* Concentration inputs:
+    * Concentration measurement inputs:
+        * the concentration (for the examples within, below the limit of quantification, BLQ, is indicated by the value of zero)
+        * (Optional) the limit of quantification
+        * (optional) the upper limit of quantification
+    * Concentration measurement time inputs:
+        * Nominal time since first dose
+        * Nominal time since most recent dose
+        * Actual time since first dose
+        * Actual time since most recent dose
+* Dosing inputs:
+    * Dose definition:
+        * The route of administration (e.g. "intravascular" or "extravascular")
+        * If the data are single or multiple dose
+        * If multiple dose, if steady-state has been achieved
+        * The amount of the dose
+    * Dose time inputs (all are zero for single-dose):
+        * Nominal time since first dose
+        * Nominal time since most recent dose
+        * Actual time since first dose
+        * Actual time since most recent dose
+* Interval inputs:
+    * the IntervalTimeRange (range of times for parameter calculations, e.g. 0 and 24 for AUC0-24);
+    * the LambdaTimeRange (range to be used for lz estimation);
+    * the length of the dosing interval (tau; this may be detected from the dosing data);
+* Calculation inputs:
+    * how to handle loq-values (what loq-rule to be applied)
+    * flags for what datapoints and/or subjects have to be omitted
+
+## SDTM Alignment
+
+The following is intended to assist with the creation of data for testing validation and with general knowledge about SDTM.  Please refer to the SDTM and ADaM standards for complete information.
+
+While not required for this standard, it is recommeded that raw data should conform to the SDTM PC domain and EX domain specifications for concentration and dosing data, when possible.  Analysis data should conform to the SDTM ADAM standard as closely as feasible; when the ADAM ADNCA specification becomes standardized, this document should be revised to align with that standard.  SDTM column names are not required but are preferred, and any software should detect SDTM-formatted data by default.  Other standards may be used, and the minimum specifications are provided above.
+
+* Concentration dataset (`pc.xpt`)
+    * Concentration (SDTM column: PCSTRESC or PCSTRESN)
+    * Sample time (derived from SDTM columns PCDTC, PCRFTDTC, and PCELTM)
+    * Lower limit of quantification (SDTM column: PCLLOQ)
+    * Upper limit of quantification (SDTM column: PCULOQ)
+    * Specimen collection date and time, or start of specimen collection (SDTM column: PCDTC)
+    * Specimen collection ending date and time (SDTM column: PCENDTC)
+    * Time of last dose (SDTM column: PCELTM or PCTPTNUM)
+
+# Output Data
+
+Outputs should align with the SDTM PP domain.

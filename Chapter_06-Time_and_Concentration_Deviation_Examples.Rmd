@@ -1,0 +1,162 @@
+---
+title: 'Time and Concentration Deviation Examples'
+author: Jan Huisman
+date: October 21, 2016
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+--- 
+
+```{r loadlibraries, include = FALSE}
+
+## set time default
+options(stringsAsFactors = FALSE)
+
+# Load libraries
+
+library("dplyr")
+library("ggplot2")
+library("cowplot")
+```
+
+```{r loaddata, cache=FALSE, echo=FALSE}
+## Get all .csv files
+filenames.tests <- list.files(path="Files-Chapter_06", pattern=".*\\.csv$", full.names=TRUE)
+## Each filename should have a test set name, a test number, and if it includes
+## the "implied" data or not.
+pattern.filename <- "^([A-Z]+)-([A-Za-z0-9]+)(_impl)?.csv$"
+if (!all(mask.match <- grepl(pattern.filename, basename(filenames.tests)))) {
+  stop("Some input files do not have the expected filename structure.  Please check the directory and the files in the directory and retry.  The files that do not match are: ",
+       paste(filenames.tests[!mask.match], collapse=", "))
+}
+
+data.type.map <-
+  data.frame(
+    type=0:4,
+    Data.Desc=
+      factor(
+        c("Observation on-time and above LOQ",
+          "Observation below LOQ",
+          "Time Deviation",
+          "Missing Value",
+          "Imputed Value"),
+        levels=c(
+          "Observation on-time and above LOQ",
+          "Observation below LOQ",
+          "Time Deviation",
+          "Missing Value",
+          "Imputed Value"),
+        ordered=TRUE))
+
+rawdata <- list()
+for (f in filenames.tests) {
+  test.group <- gsub(pattern.filename, "\\1", basename(f))
+  test.number <- gsub(pattern.filename, "\\2", basename(f))
+  test.result <- gsub(pattern.filename, "\\3", basename(f))
+  if (!(test.group %in% names(rawdata))) {
+    rawdata[[test.group]] <- list()
+  }
+  if (!(test.number %in% names(rawdata[[test.group]]))) {
+    rawdata[[test.group]][[test.number]] <-
+      list(data.before.cleaning=NULL,
+           data.after.cleaning=NULL)
+  }
+  if (nchar(test.result) == 0) {
+    test.result <- "data.before.cleaning"
+  } else {
+    test.result <- "data.after.cleaning"
+  }
+  rawdata[[test.group]][[test.number]][[test.result]] <-
+    merge(read.csv(f,
+                   stringsAsFactors=FALSE,
+                   na.strings="."),
+          data.type.map)
+}
+
+## Confirm that every rule has both a beore and after cleaning result
+for (group in names(rawdata)) {
+  for (number in names(rawdata[[group]])) {
+    if (!all(c("data.before.cleaning", "data.after.cleaning") %in%
+             names(rawdata[[group]][[number]]))) {
+      stop("Missing either before or after data for test ", group, " ", number)
+    }
+    if (is.null(rawdata[[group]][[number]]$data.before.cleaning)) {
+      stop("Missing before data for test ", group, " ", number)
+    }
+    if (is.null(rawdata[[group]][[number]]$data.after.cleaning)) {
+      stop("Missing after data for test ", group, " ", number)
+    }
+  }
+}
+
+```
+
+```{r plotdata, fig.height=5, fig.width=10, echo=FALSE, results="asis"}
+
+## Choose the order for reporting
+grouporder <- c("SDT", "MDT", "SDC", "MDC")
+## Make sure that we don't leave out any groups
+grouporder <- c(grouporder, setdiff(names(rawdata), grouporder))
+
+## Loop over the groups
+for (group in grouporder) {
+  ## Add the group name
+  cat("# ", group, "\n", sep="")
+  ## Loop over the tests
+  for (testnum in names(rawdata[[group]])) {
+    rulenum <- paste0(group, "-", testnum)
+    # Add the test number
+    cat("## ", rulenum, "\n", sep="")
+    ## Combine the original and corrected datasets
+    plotdata <-
+      bind_rows(mutate(rawdata[[group]][[testnum]][["data.before.cleaning"]],
+                       source="Original Data"),
+                mutate(rawdata[[group]][[testnum]][["data.after.cleaning"]],
+                       source="Corrected Data"))
+    plotdata$source <- factor(plotdata$source,
+                              levels=c("Original Data", "Corrected Data"),
+                              ordered=TRUE)
+    ## Impute BLQ
+    plotdata$dv.point <- ifelse(plotdata$type %in% (1:3) & is.na(plotdata$dv),
+                                0,
+                                plotdata$dv)
+    plotdata$dv.line <- plotdata$dv
+    ## Generate the plot
+    currentplot <-
+      ggplot(plotdata) +
+      geom_line(data=plotdata[!is.na(plotdata$dv.line),],
+                aes(x=tad, y=dv.line),
+                colour="black",
+                linetype="solid") +
+      geom_point(aes(x=tad, y=dv.point, colour=Data.Desc),
+                 size=3) +
+      geom_vline(aes(xintercept=ntad),
+                 color="black",
+                 linetype="dotted",
+                 size=1) +
+      facet_grid(source~.) +
+      scale_color_discrete(drop=FALSE) +
+      theme(panel.margin=unit(1, "lines"),
+            legend.direction="horizontal",
+            legend.position=c(0.5, 1.1),
+            legend.text=element_text(size=rel(0.6)),
+            aspect.ratio=0.15,
+            plot.title=element_text(hjust=0)) +
+      labs(title=paste("Rule", rulenum),
+           x="Time",
+           y="Concentration",
+           colour="")
+    print(currentplot)
+    
+    cat("\n\n")
+  }
+}
+
+```
+
+# Session Information
+
+```{r sessioninfo, cache=FALSE}
+sessionInfo()
+```
