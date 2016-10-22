@@ -1,0 +1,15 @@
+"","rule","id","ntad","tad","dv","loq","desc","type"
+"1","SDC-4c",12,0,0,"4211",".","example rule SDC-4c",4
+"2","SDC-4c",12,0.5,0.5,"4211",".","example rule SDC-4c",0
+"3","SDC-4c",12,1,1,".",".","example rule SDC-4c",3
+"4","SDC-4c",12,1.5,1.5,"808",".","example rule SDC-4c",0
+"5","SDC-4c",12,2,2,"405",".","example rule SDC-4c",0
+"6","SDC-4c",12,3,3,"168",".","example rule SDC-4c",0
+"7","SDC-4c",12,4,4,"122",".","example rule SDC-4c",0
+"8","SDC-4c",12,6,6,"101",".","example rule SDC-4c",0
+"9","SDC-4c",12,8,8,"88",".","example rule SDC-4c",0
+"10","SDC-4c",12,12,12,"67",".","example rule SDC-4c",0
+"11","SDC-4c",12,16,16,"51",".","example rule SDC-4c",0
+"12","SDC-4c",12,24,24,"30",".","example rule SDC-4c",0
+"13","SDC-4c",12,36,36,"13",".","example rule SDC-4c",0
+"14","SDC-4c",12,48,48,"6",".","example rule SDC-4c",0

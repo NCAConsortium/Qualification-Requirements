@@ -1,0 +1,16 @@
+"","rule","id","ntad","tad","dv","loq","desc","type"
+"1","MDT-3",6,0,0,1.1,".","example rule MDT-3",0
+"2","MDT-3",6,0.5,0.5,0.76,".","example rule MDT-3",0
+"3","MDT-3",6,1,1,1.42,".","example rule MDT-3",0
+"4","MDT-3",6,2,2,2.48,".","example rule MDT-3",0
+"5","MDT-3",6,3,3,3.24,".","example rule MDT-3",0
+"6","MDT-3",6,4,4,3.75,".","example rule MDT-3",0
+"7","MDT-3",6,6,6,4.27,".","example rule MDT-3",0
+"8","MDT-3",6,8,8,4.31,".","example rule MDT-3",0
+"9","MDT-3",6,10,10,4.09,".","example rule MDT-3",0
+"10","MDT-3",6,12,12,3.72,".","example rule MDT-3",0
+"11","MDT-3",6,18,18,2.46,".","example rule MDT-3",0
+"12","MDT-3",6,24,24,1.45,".","example rule MDT-3",0
+"13","MDT-3",6,36,36,0.43,".","example rule MDT-3",0
+"14","MDT-3",6,48,45,0.11,".","example rule MDT-3",2
+"15","MDT-3",6,48,48,0.090214,".","example rule MDT-3",4

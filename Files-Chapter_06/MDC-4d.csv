@@ -1,0 +1,15 @@
+"","rule","id","ntad","tad","dv","loq","desc","type"
+"1","MDC-4d",20,0,0,".",".","example rule MDC-4d",3
+"2","MDC-4d",20,0.5,0.5,"4211",".","example rule MDC-4d",0
+"3","MDC-4d",20,1,1,".","0.1","example rule MDC-4d",1
+"4","MDC-4d",20,1.5,1.5,"808",".","example rule MDC-4d",0
+"5","MDC-4d",20,2,2,"405",".","example rule MDC-4d",0
+"6","MDC-4d",20,3,3,"168",".","example rule MDC-4d",0
+"7","MDC-4d",20,4,4,"122",".","example rule MDC-4d",0
+"8","MDC-4d",20,6,6,"101",".","example rule MDC-4d",0
+"9","MDC-4d",20,8,8,"88",".","example rule MDC-4d",0
+"10","MDC-4d",20,12,12,"67",".","example rule MDC-4d",0
+"11","MDC-4d",20,16,16,"51",".","example rule MDC-4d",0
+"12","MDC-4d",20,24,24,"30",".","example rule MDC-4d",0
+"13","MDC-4d",20,36,36,"13",".","example rule MDC-4d",0
+"14","MDC-4d",20,48,48,"6",".","example rule MDC-4d",0
