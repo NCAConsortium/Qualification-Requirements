@@ -11,14 +11,10 @@ knitr::opts_chunk$set(echo = TRUE)
 # General Consideration
 The data specification is based on the assumption that the input dataset is a 2-dimensional table with variables as columns and a row for each observation. The following sections describe the columns (i.e., variables) of the input dataset. 
 
-The Input Data specification is grouped as follows:
-* Profile keys (required): variables that uniquely identify a concentration-time profile
+The variables are grouped as follows:
 * Analysis data (required): concentration-time profile and dosing data
 * Profile characteristics (optional no default values): subject or data specific variables 
 * NCA parameters (optional with default values): options to be applied in the NCA algorithm
-
-
-# Input Data: Profile Keys
 
 
 # Input Data: Analysis Data
