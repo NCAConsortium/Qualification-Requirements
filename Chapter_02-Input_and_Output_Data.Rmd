@@ -8,6 +8,13 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+# General Consideration
+
+The Input Data specification is grouped as follows:
+* Analysis data (required): concentration-time profile and dosing data
+* Profile keys (required): variables that uniquely identify a concentration-time profile
+* Profile characteristics (optional no default values): subject or data specific variables 
+* NCA parameters (optional with default values): options to be applied in the NCA algorithm
 
 # Input Data
 
