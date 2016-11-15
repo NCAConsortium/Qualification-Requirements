@@ -25,7 +25,7 @@ These are the concentration-time profiles and the dosing data that are actually 
      * Vectors of interval time values (for 
 * Dosing inputs:
     * Dose definition:
-        * The amount of the dose
+        * The amount of the reference dose
         * Value to indicate the route of administration (e.g. "intravascular bolus", "intravascular infusion", or "extravascular") 
         * Flag to indicate single or multiple dose administration 
         * Flag to indicate if steady-state has been achieved (only applicable for multiple dose administration)
@@ -39,8 +39,6 @@ These are the concentration-time profiles and the dosing data that are actually 
         * Actual start time since most recent dose (for intravascular infusion) 
         * Nominal end time since most recent dose (for intravascular infusion) 
         * Actual end time since most recent dose (for intravascular infusion) 
-* Interval inputs:
-* Calculation inputs:
 
 # Input Data: Characteristics
 * Limit of Quantification
@@ -51,12 +49,17 @@ These are the concentration-time profiles and the dosing data that are actually 
 
 # Input Data: NCA Options
 * (Optional) vector of exclusion flags. Value is "Y" or "1" if a concentration-time pair is excluded
-* how to handle loq-values (i.e., what BQL rule to be applied)
-* the IntervalTimeRange (range of times for parameter calculations, e.g. 0 and 24 for AUC0-24);
-* the LambdaTimeRange (range to be used for lz estimation);
+* (Optional, default is ???) Value that indicates how to handle loq-values (i.e., what BQL rule should be applied)
+* (Optional, default is ???) Value that indicates how to handle pre-dose samples (i.e., what pre-dose rule should be applied)
+* Partial AUC ranges (the vectors for the start and end values of the partial AUC rangs have to be of equal length)
+    * (Optional) Vector of the start values for time ranges for partial AUC calculation (e.g., 0 and 12 for AUC0-24 and AUC12-24);
+    * (Optional) Vector of the end values for time ranges for partial AUC calculation (e.g., 24 and 24 for AUC0-24 and AUC12-24);
+* LambdaZ calculation (if no values are provided, the LambdaZ range is determined automatically by the NCA function
+    * (Optional) start value of the range to be used for lz estimation;
+    * (Optional) end value of the range to be used for lz estimation;
 
 
-## SDTM Alignment
+## SDTM Alignment (not yet updated)
 
 The following is intended to assist with the creation of data for testing validation and with general knowledge about SDTM.  Please refer to the SDTM and ADaM standards for complete information.
 
