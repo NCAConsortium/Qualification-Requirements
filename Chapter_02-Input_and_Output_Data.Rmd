@@ -9,28 +9,20 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 # General Consideration
-The data specification is based on the assumption that the input dataset is a 2-dimensional table with variables as columns and a row for each observation. The following sections describe the columns (i.e., variables) of the input dataset. 
-
-The variables are grouped as follows:
-* Analysis data (required): concentration-time profile and dosing data
-* Profile characteristics (optional no default values): subject or data specific variables 
-* NCA parameters (optional with default values): options to be applied in the NCA algorithm
-
+The data specification in this section assumes an "NCA function" that calculates the PK parameters from one concentration-time profile (i.e., a series of time/concentration value pairs) that represent the sampled data for one subject after the administration of a drug at time zero. In addition, there are variables that contain subject or data specific characteristics or NCA options to be used when calculating the PK parameters. 
 
 # Input Data: Analysis Data
+These are the concentration-time profiles and the dosing data that are actually analyzed by the NCA function. 
 
-These are the concentration-time and dosing data that are actually analysed by the NCA core algorithm. 
-
-* Concentration inputs:
-    * Concentration measurement inputs:
+* Concentration inputs (the concentration measurement and time point vectors have to be of equal length):
+    * Vector of concentration measurements:
         * the concentration (for the examples within, below the limit of quantification, BLQ, is indicated by the value of zero)
-        * (Optional) the limit of quantification
-        * (optional) the upper limit of quantification
-    * Concentration measurement time inputs:
+
+    * Vector of time points for concentration measurements:
         * Nominal time since first dose
-        * Nominal time since most recent dose
+        * Nominal time since most recent dose (also referred to as reference dose for the profile)
         * Actual time since first dose
-        * Actual time since most recent dose
+        * Actual time since most recent dose (also referred to as reference dose)
 * Dosing inputs:
     * Dose definition:
         * The route of administration (e.g. "intravascular" or "extravascular")
@@ -49,6 +41,13 @@ These are the concentration-time and dosing data that are actually analysed by t
 * Calculation inputs:
     * how to handle loq-values (what loq-rule to be applied)
     * flags for what datapoints and/or subjects have to be omitted
+
+# Input Data: Characteristics
+* Limit of Quantification
+    * (Optional) the lower limit of quantification
+    * (Optional) the upper limit of quantification
+* Analyte
+    * (Optional) flag that indicates that the analyte is a metabolite and not the parent drug
 
 ## SDTM Alignment
 
