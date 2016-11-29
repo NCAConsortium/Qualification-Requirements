@@ -8,21 +8,25 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-# General Consideration
-The data specification in this section assumes an "NCA function" that calculates the PK parameters from one concentration-time profile (i.e., a series of time/concentration value pairs) that represent the sampled data for one subject after the administration of a drug at time zero. In addition, there are variables that contain subject or data specific characteristics or NCA options to be used when calculating the PK parameters. 
+# General Remarks
+The data specification in this section assumes an "NCA function" in R (or an R package) that calculates the PK parameters from one concentration-time profile (i.e., a series of time/concentration value pairs) that represent the sampled data for one subject after the administration of the study drug at time zero (for PO or IV bolus administration) or starting at time zero (for IV infusion administration). In addition, there are variables that contain subject or data specific characteristics or NCA options to be used when calculating the PK parameters. 
 
 # Input Data: Analysis Data
-These are the concentration-time profiles and the dosing data that are actually analyzed by the NCA function. 
+These are the concentration-time profile and dosing data that are actually analyzed by the NCA function. 
 
 * Observation/Sample inputs (the concentration measurement and time point vectors have to be of equal length):
     * Vector of concentration measurements:
         * the concentration value (not adjusted using applicable BQL rule)
     * Vectors of time points for concentration measurements:
-        * Nominal time since first dose (??? Not needed or used for NCA, right?)
-        * Nominal time since most recent dose (also referred to as reference dose for the profile) 
-        * Actual time since first dose (??? Not needed or used for NCA, right?)
-        * Actual time since most recent dose (also referred to as reference dose)
-     * Vectors of interval time values (for 
+        * Nominal sampling time or nominal start time of sampling interval since first dose (really required??? Not needed or used for NCA, right?)
+        * Nominal sampling time or nominal start time of sampling interval since most recent dose (aka reference dose) for the profile
+        * Actual sampling time or actual start time of sampling interval since first dose (really required??? Not needed or used for NCA, right?)
+        * Actual sampling time or actual start time of sampling interval since most recent dose (aka reference dose) 
+     * Vectors of time points indicating the end of a sampling interval (for example, for urine studies)      
+        * Nominal end time of sampling interval since first dose (really required??? Not needed or used for NCA, right?)
+        * Nominal end time of sampling interval since most recent dose (aka reference dose) for the profile
+        * Actual end time of sampling interval since first dose (really required??? Not needed or used for NCA, right?)
+        * Actual end time of sampling interval since most recent dose (aka reference dose) 
 * Dosing inputs:
     * Dose definition:
         * The amount of the reference dose
@@ -30,15 +34,11 @@ These are the concentration-time profiles and the dosing data that are actually 
         * Flag to indicate single or multiple dose administration 
         * Flag to indicate if steady-state has been achieved (only applicable for multiple dose administration)
     * Dose time inputs (all are zero for single-dose):
-        * Nominal time since first dose (??? Not needed or used for NCA, right?)
-        * Actual time since first dose (??? Not needed or used for NCA, right?)
-        * Nominal time since most recent dose 
-        * Actual time since most recent dose
-        * Time between dose administration for multiple dose administration (often referred to as TAU);
-        * Nominal start time time for most recent dose (for intravascular infusion) 
-        * Actual start time since most recent dose (for intravascular infusion) 
+        * Nominal time or nonimal start time of reference dose 
+        * Actual time or actual start time of reference dose
         * Nominal end time since most recent dose (for intravascular infusion) 
         * Actual end time since most recent dose (for intravascular infusion) 
+        * Time between dose administration for multiple dose administration (often referred to as TAU);
 
 # Input Data: Characteristics
 * Limit of Quantification
@@ -48,22 +48,22 @@ These are the concentration-time profiles and the dosing data that are actually 
     * (Optional) flag that indicates that the analyte is a metabolite and not the parent drug
 
 # Input Data: NCA Options
-* (Optional) vector of exclusion flags. Value is "Y" or "1" if a concentration-time pair is excluded
-* (Optional, default is ???) Value that indicates how to handle loq-values (i.e., what BQL rule should be applied)
-* (Optional, default is ???) Value that indicates how to handle pre-dose samples (i.e., what pre-dose rule should be applied)
-* Partial AUC ranges (the vectors for the start and end values of the partial AUC rangs have to be of equal length)
-    * (Optional) Vector of the start values for time ranges for partial AUC calculation (e.g., 0 and 12 for AUC0-24 and AUC12-24);
-    * (Optional) Vector of the end values for time ranges for partial AUC calculation (e.g., 24 and 24 for AUC0-24 and AUC12-24);
+* (Optional) vector of exclusion flags. Value is "Y" or "1" if a concentration-time value pair is excluded
+* (Optional, default needs to be determined ???) Value that indicates how to handle loq-values (i.e., what BQL rule should be applied)
+* (Optional, default needs to be determined ???) Value that indicates how to handle pre-dose samples (i.e., what pre-dose rule should be applied)
+* Partial AUC ranges (the vectors for the start and end values of the partial AUC ranges have to be of equal length)
+    * (Optional) Vector of the start values for time ranges for partial AUC calculation (e.g., 0 and 12 for calculating AUC0-24 and AUC12-24);
+    * (Optional) Vector of the end values for time ranges for partial AUC calculation (e.g., 24 and 24 for calculating AUC0-24 and AUC12-24);
 * LambdaZ calculation (if no values are provided, the LambdaZ range is determined automatically by the NCA function
     * (Optional) start value of the range to be used for lz estimation;
     * (Optional) end value of the range to be used for lz estimation;
 
 
-## SDTM Alignment (not yet updated)
+## CDISC Alignment 
 
-The following is intended to assist with the creation of data for testing validation and with general knowledge about SDTM.  Please refer to the SDTM and ADaM standards for complete information.
+The input data requirements represent a subset of a dataset as defined by the ADaM subteam working on ADaM NCA standard. 
 
-While not required for this standard, it is recommeded that raw data should conform to the SDTM PC domain and EX domain specifications for concentration and dosing data, when possible.  Analysis data should conform to the SDTM ADAM standard as closely as feasible; when the ADAM ADNCA specification becomes standardized, this document should be revised to align with that standard.  SDTM column names are not required but are preferred, and any software should detect SDTM-formatted data by default.  Other standards may be used, and the minimum specifications are provided above.
+The NCA Consortium Speficication does not require that input data should conform to the ADNCA standard (which is still under development) or the relevant SDTM PC and EX domain specifications for concentration and dosing data. However, it is recommended that analysis data should conform to the ADAM NCA standard as closely as feasible. When the ADAM ADNCA specification becomes standardized, this document should be revised to align with that standard. SDTM or ADaM column names are not required but are preferred, and any software should be anabled to use CDISC-formatted data by default. To support the use of other data standards the minimum specifications are provided above.
 
 * Concentration dataset (`pc.xpt`)
     * Concentration (SDTM column: PCSTRESC or PCSTRESN)
