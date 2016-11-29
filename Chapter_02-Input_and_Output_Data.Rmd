@@ -15,8 +15,9 @@ The data specification in this section assumes an "NCA function" in R (or an R p
 These are the concentration-time profile and dosing data that are actually analyzed by the NCA function. 
 
 * Observation/Sample inputs (the concentration measurement and time point vectors have to be of equal length):
-    * Vector of concentration measurements:
+    * Vector of observations (concentration and volume measurements):
         * the concentration value (not adjusted using applicable BQL rule)
+        * the volume value (for urine samples)
     * Vectors of time points for concentration measurements:
         * Nominal sampling time or nominal start time of sampling interval since first dose (really required??? Not needed or used for NCA, right?)
         * Nominal sampling time or nominal start time of sampling interval since most recent dose (aka reference dose) for the profile
@@ -34,10 +35,10 @@ These are the concentration-time profile and dosing data that are actually analy
         * Flag to indicate single or multiple dose administration 
         * Flag to indicate if steady-state has been achieved (only applicable for multiple dose administration)
     * Dose time inputs (all are zero for single-dose):
-        * Nominal time or nonimal start time of reference dose 
-        * Actual time or actual start time of reference dose
-        * Nominal end time since most recent dose (for intravascular infusion) 
-        * Actual end time since most recent dose (for intravascular infusion) 
+        * Nominal time point or nominal start time of reference dose (should always be zero, right???)
+        * Actual time point or actual start time of reference dose
+        * Nominal duration of dose administration for intravascular infusion
+        * Actual duration of dose administration for intravascular infusion 
         * Time between dose administration for multiple dose administration (often referred to as TAU);
 
 # Input Data: Characteristics
@@ -45,10 +46,10 @@ These are the concentration-time profile and dosing data that are actually analy
     * (Optional) the lower limit of quantification
     * (Optional) the upper limit of quantification
 * Analyte
-    * (Optional) flag that indicates that the analyte is a metabolite and not the parent drug
+    * (Optional) flag that indicates that the analyte is a metabolite and not the parent drug. Value is "Y" if the analyte is a metabolite.
 
 # Input Data: NCA Options
-* (Optional) vector of exclusion flags. Value is "Y" or "1" if a concentration-time value pair is excluded
+* (Optional) vector of exclusion flags. Value is "Y" if a concentration-time value pair is excluded
 * (Optional, default needs to be determined ???) Value that indicates how to handle loq-values (i.e., what BQL rule should be applied)
 * (Optional, default needs to be determined ???) Value that indicates how to handle pre-dose samples (i.e., what pre-dose rule should be applied)
 * Partial AUC ranges (the vectors for the start and end values of the partial AUC ranges have to be of equal length)
