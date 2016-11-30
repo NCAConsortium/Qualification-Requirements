@@ -12,32 +12,32 @@ knitr::opts_chunk$set(echo = TRUE)
 The data specification in this section assumes an "NCA function" in R (or an R package) that calculates the PK parameters from one concentration-time profile (i.e., a series of time/concentration value pairs) that represent the sampled data for one subject after the administration of the study drug at time zero (for PO or IV bolus administration) or starting at time zero (for IV infusion administration). In addition, there are variables that contain subject or data specific characteristics or NCA options to be used when calculating the PK parameters. 
 
 # Input Data: Analysis Data
-These are the concentration-time profile and dosing data that are actually analyzed by the NCA function. 
+These are the concentration-time profile and dosing data that are actually analyzed by the NCA function. Note that unit variables are not listed here as they are not actually used in the NCA calculations. 
 
 * Observation/Sample inputs (the concentration measurement and time point vectors have to be of equal length):
     * Vector of observations (concentration and volume measurements):
-        * the concentration value (not adjusted using applicable BQL rule)
+        * the concentration value (are these already adjusted using applicable BQL rule? )
         * the volume value (for urine samples)
     * Vectors of time points for concentration measurements:
-        * Nominal sampling time or nominal start time of sampling interval since first dose (really required??? Not needed or used for NCA, right?)
-        * Nominal sampling time or nominal start time of sampling interval since most recent dose (aka reference dose) for the profile
-        * Actual sampling time or actual start time of sampling interval since first dose (really required??? Not needed or used for NCA, right?)
-        * Actual sampling time or actual start time of sampling interval since most recent dose (aka reference dose) 
-     * Vectors of time points indicating the end of a sampling interval (for example, for urine studies)      
-        * Nominal end time of sampling interval since first dose (really required??? Not needed or used for NCA, right?)
-        * Nominal end time of sampling interval since most recent dose (aka reference dose) for the profile
-        * Actual end time of sampling interval since first dose (really required??? Not needed or used for NCA, right?)
-        * Actual end time of sampling interval since most recent dose (aka reference dose) 
+        * Nominal collection time or nominal start time of collection interval since first dose (really required??? Not needed or used for NCA, right?)
+        * Nominal collection time or nominal start time of collection interval since the reference dose for the profile
+        * Actual collection time or actual start time of collection interval since first dose (really required??? Not needed or used for NCA, right?)
+        * Actual collection time or actual start time of collection interval since the reference dose for the profile
+     * Vectors of time points indicating the end of a collection interval (for example, for urine studies)      
+        * Nominal end time of collection interval since first dose (really required??? Not needed or used for NCA, right?)
+        * Nominal end time of collection interval since the reference dose for the profile
+        * Actual end time of collection interval since first dose (really required??? Not needed or used for NCA, right?)
+        * Actual end time of collection interval since the reference dose for the profile
 * Dosing inputs:
     * Dose definition:
         * The amount of the reference dose
         * Value to indicate the route of administration (e.g. "intravascular bolus", "intravascular infusion", or "extravascular") 
-        * Flag to indicate single or multiple dose administration 
+        * Flag to indicate single or multiple dose administration (really required??? I would expect that the "steady-state flag" is sufficient. 
         * Flag to indicate if steady-state has been achieved (only applicable for multiple dose administration)
     * Dose time inputs (all are zero for single-dose):
-        * Nominal time point or nominal start time of reference dose (should always be zero, right???)
-        * Actual time point or actual start time of reference dose
-        * Nominal duration of dose administration for intravascular infusion
+        * Nominal time point or nominal start time of reference dose (really required??? Not needed or used for NCA, right?)
+        * Actual time point or actual start time of reference dose (should always be zero, right???)
+        * Nominal duration of dose administration for intravascular infusion (not in ADNCA specification)
         * Actual duration of dose administration for intravascular infusion 
         * Time between dose administration for multiple dose administration (often referred to as TAU);
 
@@ -66,15 +66,9 @@ The input data requirements represent a subset of a dataset as defined by the AD
 
 The NCA Consortium Speficication does not require that input data should conform to the ADNCA standard (which is still under development) or the relevant SDTM PC and EX domain specifications for concentration and dosing data. However, it is recommended that analysis data should conform to the ADAM NCA standard as closely as feasible. When the ADAM ADNCA specification becomes standardized, this document should be revised to align with that standard. SDTM or ADaM column names are not required but are preferred, and any software should be anabled to use CDISC-formatted data by default. To support the use of other data standards the minimum specifications are provided above.
 
-* Concentration dataset (`pc.xpt`)
-    * Concentration (SDTM column: PCSTRESC or PCSTRESN)
-    * Sample time (derived from SDTM columns PCDTC, PCRFTDTC, and PCELTM)
-    * Lower limit of quantification (SDTM column: PCLLOQ)
-    * Upper limit of quantification (SDTM column: PCULOQ)
-    * Specimen collection date and time, or start of specimen collection (SDTM column: PCDTC)
-    * Specimen collection ending date and time (SDTM column: PCENDTC)
-    * Time of last dose (SDTM column: PCELTM or PCTPTNUM)
+* ADNCA Specification
+A file called "ADNCA_Variables_Draft_NCA-Consortium.xlsx" lists variables as defined in the current draft of the ADNCA specification with comments and how these variables could be derived from SDTM domains. 
 
 # Output Data
 
-Outputs should align with the SDTM PP domain. MORE TO COME ...
+Outputs should align with the SDTM PP domain. MORE NEEDS TO BE DEFINED ...
